@@ -1,20 +1,21 @@
 {
-  "name": "app",
+  "name": "savetodrive-frontend",
   "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1"
-  },
+  "description": "A website that uploads files through URL to Cloud Services",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "eslintConfig": {
-    "extends": "react-app"
+  "author": "vietduc01100001",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "3.0.1",
+    "socket.io-client": "^2.2.0"
   },
   "browserslist": {
     "production": [
