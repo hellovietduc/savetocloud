@@ -1,3 +1,3 @@
 # savetodrive-frontend
 
-A website that uploads files through URL to Cloud Services
+SaveToDrive - Upload files from URL to Cloud Services

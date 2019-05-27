@@ -25,3 +25,13 @@ header {
 .icon-cloud-upload {
   margin-left: 5px;
 }
+
+.message {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.download {
+  margin: 10px 0;
+  text-align: center;
+}
