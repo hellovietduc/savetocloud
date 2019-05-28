@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import MenuItem from '@material-ui/core/MenuItem';
-import Button from '@material-ui/core/Button';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import LinearProgress from '@material-ui/core/LinearProgress';
 import Header from './components/Header';
+import InputUrl from './components/InputUrl';
+import InputService from './components/InputService';
+import InputFilename from './components/InputFilename';
+import BtnSave from './components/BtnSave';
 import NotiMessage from './components/NotiMessage';
 import FileHistory from './components/FileHistory';
 import Footer from './components/Footer';
@@ -25,6 +25,7 @@ class App extends Component {
     this.state = {
       socketId: '',
       isAuthenticated: false,
+      isProcessing: false,
       url: '',
       service: services[0].value,
       filename: '',
@@ -32,30 +33,11 @@ class App extends Component {
         type: '',
         content: ''
       },
-      isProcessing: false,
       fileHistory: []
     };
     this.postRequest = this.postRequest.bind(this);
     this.handleChangeInput = this.handleChangeInput.bind(this);
     this.handleClickSave = this.handleClickSave.bind(this);
-  }
-
-  postRequest() {
-    API.post('/files', {
-      socketId: this.state.socketId,
-      url: this.state.url,
-      service: this.state.service,
-      filename: this.state.filename
-    }).catch(err => {
-      const errMessage = err.response.data.msg ? `: ${err.response.data.msg}` : '';
-      this.setState({
-        message: {
-          type: 'error',
-          content: `Request failed with status ${err.response.status}${errMessage}`
-        },
-        isProcessing: false
-      });
-    });
   }
 
   handleChangeInput(name) {
@@ -93,6 +75,24 @@ class App extends Component {
         isProcessing: false
       });
     }
+  }
+
+  postRequest() {
+    API.post('/files', {
+      socketId: this.state.socketId,
+      url: this.state.url,
+      service: this.state.service,
+      filename: this.state.filename
+    }).catch(err => {
+      const errMessage = err.response.data.msg ? `: ${err.response.data.msg}` : '';
+      this.setState({
+        message: {
+          type: 'error',
+          content: `Request failed with status ${err.response.status}${errMessage}`
+        },
+        isProcessing: false
+      });
+    });
   }
 
   componentDidMount() {
@@ -173,59 +173,16 @@ class App extends Component {
             <Header />
             <Grid container spacing={1} justify="space-around">
               <Grid item xs={4}>
-                <TextField
-                  required
-                  id="url"
-                  label="File URL"
-                  value={this.state.url}
-                  onChange={this.handleChangeInput('url')}
-                  error={!this.state.url}
-                  autoFocus={true}
-                  margin="normal"
-                  fullWidth
-                  variant="filled"
-                />
+                <InputUrl value={this.state.url} onChange={this.handleChangeInput} />
               </Grid>
               <Grid item xs={3}>
-                <TextField
-                  required
-                  select
-                  id="service"
-                  label="Cloud Service"
-                  value={this.state.service}
-                  onChange={this.handleChangeInput('service')}
-                  margin="normal"
-                  fullWidth
-                  variant="filled"
-                >
-                  {services.map(service => (
-                    <MenuItem key={service.value} value={service.value}>
-                      {service.label}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                <InputService value={this.state.service} services={services} onChange={this.handleChangeInput} />
               </Grid>
               <Grid item xs={3}>
-                <TextField
-                  id="filename"
-                  label="Filename to save"
-                  value={this.state.filename}
-                  onChange={this.handleChangeInput('filename')}
-                  margin="normal"
-                  fullWidth
-                  variant="filled"
-                />
+                <InputFilename value={this.state.filename} onChange={this.handleChangeInput} />
               </Grid>
               <Grid item xs={2} className="container-center">
-                <Button
-                  onClick={this.handleClickSave}
-                  disabled={this.state.isProcessing}
-                  size="large"
-                  variant="contained"
-                >
-                  Save
-                  <CloudUploadIcon className="icon-cloud-upload" />
-                </Button>
+                <BtnSave disabled={this.state.isProcessing} onClick={this.handleClickSave} />
               </Grid>
             </Grid>
             <NotiMessage type={this.state.message.type} message={this.state.message.content} />
