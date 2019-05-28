@@ -1,19 +1,13 @@
 body {
-  margin: 0 auto;
-  padding-top: 20px;
-  width: 70%;
   font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Ubuntu', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-}
-
-header {
-  text-align: center;
-  margin-bottom: 20px;
+#root {
+  padding-top: 20px;
+  margin: 0 auto;
+  width: 70%;
 }
 
 .container-center {
