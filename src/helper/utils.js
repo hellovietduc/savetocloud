@@ -16,7 +16,15 @@ export default {
     );
   },
 
-  getDropboxAuthUrl: opts => '',
+  getDropboxAuthUrl: opts => {
+    return (
+      'https://www.dropbox.com/oauth2/authorize' +
+      `?client_id=${opts.clientId}` +
+      '&response_type=token' +
+      `&redirect_uri=${opts.redirectUri}` +
+      `&state=${opts.state}`
+    );
+  },
 
   getGoogleDriveAuthUrl: opts => '',
 
