@@ -8,7 +8,7 @@ function FileHistory(props) {
     <section className="file-history">
       {props.files.length > 0 ? (
         <div>
-          <Typography variant="h6" color="primary" gutterBottom>
+          <Typography variant="h5" gutterBottom>
             File history
           </Typography>
         </div>

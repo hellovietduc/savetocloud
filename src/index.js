@@ -24,7 +24,7 @@ class App extends Component {
     super(props);
     this.state = {
       socketId: '',
-      isAuthenticated: false,
+      auth: [],
       isProcessing: false,
       url: '',
       service: services[0].value,
@@ -48,26 +48,24 @@ class App extends Component {
     this.setState({ isProcessing: true });
 
     const url = utils.formatUrl(this.state.url);
-    if (!url)
+    if (!url) {
       return this.setState({
         message: { type: 'error', content: 'Please enter a valid URL' },
         isProcessing: false
       });
+    }
 
     this.setState({ url });
-    if (this.state.isAuthenticated) return this.postRequest();
+    if (this.state.auth.includes(this.state.service)) return this.postRequest();
+
+    const redirectUri = env.AUTH_REDIRECT_URI;
+    const state = utils.encodeUrl({ socketId: this.state.socketId, serviceCode: this.state.service });
 
     if (this.state.service === 'onedrive') {
-      const clientId = env.ONEDRIVE_APP_ID;
-      const redirectUri = env.AUTH_REDIRECT_URI;
-      const state = utils.encodeUrl({ socketId: this.state.socketId });
-      window.open(utils.getOneDriveAuthUrl({ clientId, redirectUri, state }), '_blank');
+      window.open(utils.getOneDriveAuthUrl({ clientId: env.ONEDRIVE_APP_ID, redirectUri, state }), '_blank');
     }
     if (this.state.service === 'dropbox') {
-      this.setState({
-        message: { type: 'info', content: 'Dropbox is not yet supported' },
-        isProcessing: false
-      });
+      window.open(utils.getDropboxAuthUrl({ clientId: env.DROPBOX_APP_ID, redirectUri, state }), '_blank');
     }
     if (this.state.service === 'google-drive') {
       this.setState({
@@ -158,8 +156,18 @@ class App extends Component {
       });
     });
 
-    Realtime.on('authenticated', () => {
-      this.setState({ isAuthenticated: true });
+    Realtime.on('onedrive:authenticated', () => {
+      this.setState({ auth: [...this.state.auth, 'onedrive'] });
+      this.postRequest();
+    });
+
+    Realtime.on('dropbox:authenticated', () => {
+      this.setState({ auth: [...this.state.auth, 'dropbox'] });
+      this.postRequest();
+    });
+
+    Realtime.on('google-drive:authenticated', () => {
+      this.setState({ auth: [...this.state.auth, 'google-drive'] });
       this.postRequest();
     });
   }
