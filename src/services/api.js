@@ -1,7 +1,8 @@
 import axios from 'axios';
+import env from '../config/env';
 
 const instance = axios.create({
-  baseURL: process.env.REACT_APP_SERVER_URL,
+  baseURL: env.SERVER_URL,
   headers: {
     'Content-Type': 'application/json'
   }

@@ -1,0 +1,5 @@
+export default {
+  SERVER_URL: process.env.REACT_APP_SERVER_URL,
+  AUTH_REDIRECT_URI: process.env.REACT_APP_AUTH_REDIRECT_URI,
+  ONEDRIVE_APP_ID: process.env.REACT_APP_ONEDRIVE_APP_ID
+};

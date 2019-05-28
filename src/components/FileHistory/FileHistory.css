@@ -1,0 +1,15 @@
+.file-history {
+  text-align: center;
+}
+
+.download {
+  margin: 10px 0;
+}
+
+.download a {
+  text-decoration: none;
+}
+
+.download a:hover {
+  text-decoration: underline;
+}
