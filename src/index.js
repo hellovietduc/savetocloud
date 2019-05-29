@@ -15,7 +15,6 @@ import Footer from './components/Footer';
 import API from './services/api';
 import Realtime from './services/realtime';
 import { services } from './config/constants';
-import env from './config/env';
 import utils from './helper/utils';
 import './index.css';
 
@@ -62,30 +61,13 @@ class App extends Component {
 
     const state = utils.encodeUrl({ socketId: this.state.socketId, serviceCode: this.state.service });
     if (this.state.service === 'onedrive') {
-      window.open(
-        utils.getOneDriveAuthUrl({
-          clientId: env.ONEDRIVE_APP_ID,
-          redirectUri: env.AUTH_REDIRECT_URI,
-          state
-        }),
-        '_blank'
-      );
+      window.open(utils.getOneDriveAuthUrl(state), '_blank');
     }
     if (this.state.service === 'dropbox') {
-      window.open(
-        utils.getDropboxAuthUrl({
-          clientId: env.DROPBOX_APP_ID,
-          redirectUri: env.AUTH_REDIRECT_URI,
-          state
-        }),
-        '_blank'
-      );
+      window.open(utils.getDropboxAuthUrl(state), '_blank');
     }
     if (this.state.service === 'google-drive') {
-      this.setState({
-        message: { type: 'info', content: 'Google Drive is not yet supported' },
-        isProcessing: false
-      });
+      window.open(utils.getGoogleDriveAuthUrl(state), '_blank');
     }
   }
 
