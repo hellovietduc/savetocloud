@@ -113,6 +113,17 @@ class App extends Component {
   }
 
   componentDidMount() {
+    Realtime.on('connect', () => {
+      this.setState({
+        auth: [],
+        isProcessing: false,
+        message: {
+          type: '',
+          content: ''
+        }
+      });
+    });
+
     Realtime.on('socketId', socketId => {
       this.setState({ socketId });
     });
@@ -191,6 +202,13 @@ class App extends Component {
       this.setState({ auth: [...this.state.auth, 'google-drive'] });
       this.postRequest();
       setTimeout(this.removeAuth, 3600000, 'google-drive');
+    });
+
+    Realtime.on('connect_error', async () => {
+      this.setState({
+        message: { type: 'error', content: 'Server connection error, reconnecting...' },
+        isProcessing: true
+      });
     });
   }
 
