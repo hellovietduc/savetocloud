@@ -35,9 +35,10 @@ class App extends Component {
       },
       fileHistory: []
     };
-    this.postRequest = this.postRequest.bind(this);
     this.handleChangeInput = this.handleChangeInput.bind(this);
     this.handleClickSave = this.handleClickSave.bind(this);
+    this.postRequest = this.postRequest.bind(this);
+    this.removeAuth = this.removeAuth.bind(this);
   }
 
   handleChangeInput(name) {
@@ -58,14 +59,26 @@ class App extends Component {
     this.setState({ url });
     if (this.state.auth.includes(this.state.service)) return this.postRequest();
 
-    const redirectUri = env.AUTH_REDIRECT_URI;
     const state = utils.encodeUrl({ socketId: this.state.socketId, serviceCode: this.state.service });
-
     if (this.state.service === 'onedrive') {
-      window.open(utils.getOneDriveAuthUrl({ clientId: env.ONEDRIVE_APP_ID, redirectUri, state }), '_blank');
+      window.open(
+        utils.getOneDriveAuthUrl({
+          clientId: env.ONEDRIVE_APP_ID,
+          redirectUri: env.AUTH_REDIRECT_URI,
+          state
+        }),
+        '_blank'
+      );
     }
     if (this.state.service === 'dropbox') {
-      window.open(utils.getDropboxAuthUrl({ clientId: env.DROPBOX_APP_ID, redirectUri, state }), '_blank');
+      window.open(
+        utils.getDropboxAuthUrl({
+          clientId: env.DROPBOX_APP_ID,
+          redirectUri: env.AUTH_REDIRECT_URI,
+          state
+        }),
+        '_blank'
+      );
     }
     if (this.state.service === 'google-drive') {
       this.setState({
@@ -91,6 +104,12 @@ class App extends Component {
         isProcessing: false
       });
     });
+  }
+
+  removeAuth(serviceCode) {
+    const auth = [...this.state.auth];
+    auth.splice(auth.indexOf(serviceCode), 1);
+    this.setState({ auth });
   }
 
   componentDidMount() {
@@ -159,16 +178,19 @@ class App extends Component {
     Realtime.on('onedrive:authenticated', () => {
       this.setState({ auth: [...this.state.auth, 'onedrive'] });
       this.postRequest();
+      setTimeout(this.removeAuth, 3600000, 'onedrive');
     });
 
     Realtime.on('dropbox:authenticated', () => {
       this.setState({ auth: [...this.state.auth, 'dropbox'] });
       this.postRequest();
+      setTimeout(this.removeAuth, 3600000, 'dropbox');
     });
 
     Realtime.on('google-drive:authenticated', () => {
       this.setState({ auth: [...this.state.auth, 'google-drive'] });
       this.postRequest();
+      setTimeout(this.removeAuth, 3600000, 'google-drive');
     });
   }
 
