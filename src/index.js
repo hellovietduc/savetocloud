@@ -25,6 +25,7 @@ class App extends Component {
     this.state = {
       socketId: '',
       auth: [],
+      isReconnecting: false,
       isProcessing: false,
       url: '',
       service: services[0].value,
@@ -116,16 +117,31 @@ class App extends Component {
     Realtime.on('connect', () => {
       this.setState({
         auth: [],
+        isReconnecting: false,
         isProcessing: false,
-        message: {
-          type: '',
-          content: ''
-        }
+        message: { type: '', content: '' }
       });
     });
 
     Realtime.on('socketId', socketId => {
       this.setState({ socketId });
+    });
+
+    Realtime.on('maxRequestsExceeded', async () => {
+      let secs = 60;
+      do {
+        if (!this.state.isReconnecting)
+          this.setState({
+            message: { type: 'error', content: `Max number of requests exceeded, please wait for ${secs}s` },
+            isProcessing: true
+          });
+        secs--;
+        await new Promise(r => setTimeout(r, 1000));
+      } while (secs > 0);
+      this.setState({
+        message: { type: '', content: '' },
+        isProcessing: false
+      });
     });
 
     Realtime.on('downloadStart', () => {
@@ -207,7 +223,8 @@ class App extends Component {
     Realtime.on('connect_error', async () => {
       this.setState({
         message: { type: 'error', content: 'Server connection error, reconnecting...' },
-        isProcessing: true
+        isProcessing: true,
+        isReconnecting: true
       });
     });
   }
