@@ -7,6 +7,8 @@ const regex = {
 };
 
 export default {
+  sleep: t => new Promise(r => setTimeout(r, t)),
+
   getOneDriveAuthUrl: state => {
     return (
       'https://login.microsoftonline.com/common/oauth2/v2.0/authorize' +

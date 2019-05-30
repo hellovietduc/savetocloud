@@ -118,7 +118,7 @@ class App extends Component {
             isProcessing: true
           });
         secs--;
-        await new Promise(r => setTimeout(r, 1000));
+        await utils.sleep(1000);
       } while (secs > 0);
       this.setState({
         message: { type: '', content: '' },
