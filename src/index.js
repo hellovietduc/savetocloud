@@ -9,6 +9,7 @@ import InputUrl from './components/InputUrl';
 import InputService from './components/InputService';
 import InputFilename from './components/InputFilename';
 import BtnSave from './components/BtnSave';
+import ServicesBar from './components/ServicesBar';
 import NotiMessage from './components/NotiMessage';
 import FileHistory from './components/FileHistory';
 import Footer from './components/Footer';
@@ -23,7 +24,7 @@ class App extends Component {
     super(props);
     this.state = {
       socketId: '',
-      auth: [],
+      auth: new Set(),
       isReconnecting: false,
       isProcessing: false,
       url: '',
@@ -38,6 +39,7 @@ class App extends Component {
     this.handleChangeInput = this.handleChangeInput.bind(this);
     this.handleClickSave = this.handleClickSave.bind(this);
     this.postRequest = this.postRequest.bind(this);
+    this.getAuthUrls = this.getAuthUrls.bind(this);
     this.removeAuth = this.removeAuth.bind(this);
   }
 
@@ -57,18 +59,16 @@ class App extends Component {
     }
 
     this.setState({ url });
-    if (this.state.auth.includes(this.state.service)) return this.postRequest();
+    if (this.state.auth.has(this.state.service)) return this.postRequest();
 
-    const state = utils.encodeUrl({ socketId: this.state.socketId, serviceCode: this.state.service });
-    if (this.state.service === 'onedrive') {
-      window.open(utils.getOneDriveAuthUrl(state), '_blank');
-    }
-    if (this.state.service === 'dropbox') {
-      window.open(utils.getDropboxAuthUrl(state), '_blank');
-    }
-    if (this.state.service === 'google-drive') {
-      window.open(utils.getGoogleDriveAuthUrl(state), '_blank');
-    }
+    const { label: serviceName } = utils.getServiceName(this.state.service);
+    this.setState({
+      message: {
+        type: 'error',
+        content: `Please login by clicking on the ${serviceName} icon first`
+      },
+      isProcessing: false
+    });
   }
 
   postRequest() {
@@ -89,16 +89,27 @@ class App extends Component {
     });
   }
 
+  getAuthUrls() {
+    const urls = {};
+    for (const service of services) {
+      urls[service.value] = utils.getAuthUrl(service.value, this.state.socketId);
+    }
+    return urls;
+  }
+
   removeAuth(serviceCode) {
-    const auth = [...this.state.auth];
-    auth.splice(auth.indexOf(serviceCode), 1);
-    this.setState({ auth });
+    const newAuth = new Set();
+    const entries = this.state.auth.entries();
+    for (const entry of entries) {
+      if (entry[0] !== serviceCode) newAuth.add(entry[0]);
+    }
+    this.setState({ auth: newAuth });
   }
 
   componentDidMount() {
     Realtime.on('connect', () => {
       this.setState({
-        auth: [],
+        auth: new Set(),
         isReconnecting: false,
         isProcessing: false,
         message: { type: '', content: '' }
@@ -163,7 +174,7 @@ class App extends Component {
 
     Realtime.on('saveToCloudDone', fileInfo => {
       const fileHistory = [...this.state.fileHistory];
-      fileHistory.push({
+      fileHistory.unshift({
         id: fileInfo.id,
         name: fileInfo.name,
         url: fileInfo.url
@@ -185,20 +196,44 @@ class App extends Component {
     });
 
     Realtime.on('onedrive:authenticated', () => {
-      this.setState({ auth: [...this.state.auth, 'onedrive'] });
-      this.postRequest();
+      const newAuth = new Set();
+      const entries = this.state.auth.entries();
+      for (const entry of entries) {
+        newAuth.add(entry[0]);
+      }
+      newAuth.add('onedrive');
+      this.setState({
+        auth: newAuth,
+        message: { type: '', content: '' }
+      });
       setTimeout(this.removeAuth, 3600000, 'onedrive');
     });
 
     Realtime.on('dropbox:authenticated', () => {
-      this.setState({ auth: [...this.state.auth, 'dropbox'] });
-      this.postRequest();
+      const newAuth = new Set();
+      const entries = this.state.auth.entries();
+      for (const entry of entries) {
+        newAuth.add(entry[0]);
+      }
+      newAuth.add('dropbox');
+      this.setState({
+        auth: newAuth,
+        message: { type: '', content: '' }
+      });
       setTimeout(this.removeAuth, 3600000, 'dropbox');
     });
 
     Realtime.on('google-drive:authenticated', () => {
-      this.setState({ auth: [...this.state.auth, 'google-drive'] });
-      this.postRequest();
+      const newAuth = new Set();
+      const entries = this.state.auth.entries();
+      for (const entry of entries) {
+        newAuth.add(entry[0]);
+      }
+      newAuth.add('google-drive');
+      this.setState({
+        auth: newAuth,
+        message: { type: '', content: '' }
+      });
       setTimeout(this.removeAuth, 3600000, 'google-drive');
     });
 
@@ -218,6 +253,7 @@ class App extends Component {
         <Card>
           <CardContent>
             <Header />
+            <ServicesBar auth={this.state.auth} urls={this.getAuthUrls()} />
             <Grid container spacing={1} justify="space-around">
               <Grid item xs={4}>
                 <InputUrl value={this.state.url} onChange={this.handleChangeInput} />

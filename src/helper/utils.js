@@ -1,4 +1,5 @@
 import base64url from 'base64url';
+import { services } from '../config/constants';
 import env from '../config/env';
 import GoogleAuth from './google-auth';
 
@@ -9,33 +10,36 @@ const regex = {
 export default {
   sleep: t => new Promise(r => setTimeout(r, t)),
 
-  getOneDriveAuthUrl: state => {
-    return (
-      'https://login.microsoftonline.com/common/oauth2/v2.0/authorize' +
-      `?client_id=${env.ONEDRIVE_APP_ID}` +
-      '&scope=files.readwrite' +
-      '&response_type=token' +
-      `&redirect_uri=${env.AUTH_REDIRECT_URI}` +
-      `&state=${state}`
-    );
-  },
+  getServiceName: serviceCode => services.find(s => s.value === serviceCode).label,
 
-  getDropboxAuthUrl: state => {
-    return (
-      'https://www.dropbox.com/oauth2/authorize' +
-      `?client_id=${env.DROPBOX_APP_ID}` +
-      '&response_type=token' +
-      `&redirect_uri=${env.AUTH_REDIRECT_URI}` +
-      `&state=${state}`
-    );
+  getAuthUrl: (serviceCode, socketId) => {
+    if (serviceCode === 'onedrive') {
+      const state = base64url.encode(JSON.stringify({ socketId, serviceCode: 'onedrive' }));
+      return (
+        'https://login.microsoftonline.com/common/oauth2/v2.0/authorize' +
+        `?client_id=${env.ONEDRIVE_APP_ID}` +
+        '&scope=files.readwrite' +
+        '&response_type=token' +
+        `&redirect_uri=${env.AUTH_REDIRECT_URI}` +
+        `&state=${state}`
+      );
+    }
+    if (serviceCode === 'dropbox') {
+      const state = base64url.encode(JSON.stringify({ socketId, serviceCode: 'dropbox' }));
+      return (
+        'https://www.dropbox.com/oauth2/authorize' +
+        `?client_id=${env.DROPBOX_APP_ID}` +
+        '&response_type=token' +
+        `&redirect_uri=${env.AUTH_REDIRECT_URI}` +
+        `&state=${state}`
+      );
+    }
+    if (serviceCode === 'google-drive') {
+      const client = GoogleAuth.getClient();
+      const state = base64url.encode(JSON.stringify({ socketId, serviceCode: 'google-drive' }));
+      return GoogleAuth.getAuthUrl(client, ['https://www.googleapis.com/auth/drive']) + `&state=${state}`;
+    }
   },
-
-  getGoogleDriveAuthUrl: state => {
-    const client = GoogleAuth.getClient();
-    return GoogleAuth.getAuthUrl(client, ['https://www.googleapis.com/auth/drive']) + `&state=${state}`;
-  },
-
-  encodeUrl: obj => base64url.encode(JSON.stringify(obj)),
 
   formatUrl: url => {
     url = url.trim();

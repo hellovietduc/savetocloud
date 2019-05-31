@@ -1,0 +1,15 @@
+.services-bar {
+  width: 40%;
+  margin: 20px auto;
+}
+
+.service {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.service img {
+  width: 64px;
+  height: 64px;
+}
