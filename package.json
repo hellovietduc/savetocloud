@@ -1,6 +1,6 @@
 {
   "name": "savetodrive-frontend",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "SaveToDrive - Upload files from URL to Cloud Services",
   "scripts": {
     "start": "react-scripts start",
@@ -13,7 +13,7 @@
   "dependencies": {
     "@material-ui/core": "^4.0.1",
     "@material-ui/icons": "^4.0.1",
-    "axios": "^0.18.0",
+    "axios": "^0.19.0",
     "base64url": "^3.0.1",
     "googleapis": "^40.0.0",
     "prop-types": "^15.7.2",

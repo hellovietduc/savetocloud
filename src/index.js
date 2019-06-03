@@ -61,7 +61,7 @@ class App extends Component {
     this.setState({ url });
     if (this.state.auth.has(this.state.service)) return this.postRequest();
 
-    const { label: serviceName } = utils.getServiceName(this.state.service);
+    const serviceName = utils.getServiceName(this.state.service);
     this.setState({
       message: {
         type: 'error',
@@ -255,19 +255,17 @@ class App extends Component {
             <Header />
             <ServicesBar auth={this.state.auth} urls={this.getAuthUrls()} />
             <Grid container spacing={1} justify="space-around">
-              <Grid item xs={4}>
+              <Grid item xs={7}>
                 <InputUrl value={this.state.url} onChange={this.handleChangeInput} />
               </Grid>
               <Grid item xs={3}>
                 <InputService value={this.state.service} services={services} onChange={this.handleChangeInput} />
               </Grid>
-              <Grid item xs={3}>
-                <InputFilename value={this.state.filename} onChange={this.handleChangeInput} />
-              </Grid>
               <Grid item xs={2} className="container-center">
                 <BtnSave disabled={this.state.isProcessing} onClick={this.handleClickSave} />
               </Grid>
             </Grid>
+            <InputFilename value={this.state.filename} onChange={this.handleChangeInput} />
             <NotiMessage type={this.state.message.type} message={this.state.message.content} />
             <FileHistory files={this.state.fileHistory} />
           </CardContent>
