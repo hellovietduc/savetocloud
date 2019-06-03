@@ -29,13 +29,14 @@ function ServicesBar(props) {
       <Grid container justify="center">
         {services.map(service => (
           <Grid item xs={4} key={service.code} className="service">
-            <Tooltip title={service.name}>
+            <Tooltip title={`${service.name} - ${service.loggedIn ? 'Logged In' : 'Logged Out'}`}>
               <img
                 src={env.PUBLIC_URL + `/img/${service.code}${service.loggedIn ? '' : '-bw'}.png`}
                 alt={service.name}
                 onClick={() => window.open(service.authUrl, '_blank')}
               />
             </Tooltip>
+            {service.loggedIn ? <img src={env.PUBLIC_URL + '/img/tick.png'} className="tick-icon" /> : null}
           </Grid>
         ))}
       </Grid>

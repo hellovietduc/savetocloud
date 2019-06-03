@@ -5,6 +5,7 @@
 
 .service {
   display: flex;
+  position: relative;
   align-items: center;
   justify-content: center;
 }
@@ -12,4 +13,12 @@
 .service img {
   width: 64px;
   height: 64px;
+}
+
+.service .tick-icon {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  width: 16px;
+  height: 16px;
 }
