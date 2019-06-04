@@ -36,7 +36,7 @@ function ServicesBar(props) {
                 onClick={() => window.open(service.authUrl, '_blank')}
               />
             </Tooltip>
-            {service.loggedIn ? <img src={env.PUBLIC_URL + '/img/tick.png'} className="tick-icon" /> : null}
+            {service.loggedIn ? <img src={env.PUBLIC_URL + '/img/tick.png'} alt="tick" className="tick-icon" /> : null}
           </Grid>
         ))}
       </Grid>
@@ -45,7 +45,7 @@ function ServicesBar(props) {
 }
 
 ServicesBar.propTypes = {
-  auth: PropTypes.arrayOf(PropTypes.string).isRequired,
+  auth: PropTypes.object.isRequired,
   urls: PropTypes.object.isRequired
 };
 
