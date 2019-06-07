@@ -26,7 +26,6 @@ class App extends Component {
       socketId: '',
       auth: new Set(),
       isReconnecting: false,
-      isProcessing: false,
       url: '',
       service: services[0].value,
       filename: '',
@@ -46,40 +45,20 @@ class App extends Component {
   }
 
   handleClickSave() {
-    this.setState({ isProcessing: true });
-
     const url = utils.formatUrl(this.state.url);
     if (!url) {
-      return this.showMessage('error', 'Please enter a valid URL', false);
+      return this.showMessage('error', 'Please enter a valid URL');
     }
 
     this.setState({ url });
     if (this.state.auth.has(this.state.service)) return this.postRequest();
 
     const serviceName = utils.getServiceName(this.state.service);
-    this.showMessage('error', `Please login by clicking on the ${serviceName} icon first`, false);
+    this.showMessage('error', `Please login by clicking on the ${serviceName} icon first`);
   }
 
-  showMessage(variant, message, processing, cb) {
-    if (processing === undefined && cb === undefined) {
-      this.setState({ message: { type: variant, content: message, open: true } });
-    } else if (typeof processing === 'boolean' && cb === undefined) {
-      this.setState({
-        message: { type: variant, content: message, open: true },
-        isProcessing: processing
-      });
-    } else if (typeof processing === 'function' && cb === undefined) {
-      cb = processing;
-      this.setState({ message: { type: variant, content: message, open: true } }, cb);
-    } else if (typeof processing === 'boolean' && typeof cb === 'function') {
-      this.setState(
-        {
-          message: { type: variant, content: message, open: true },
-          isProcessing: processing
-        },
-        cb
-      );
-    }
+  showMessage(variant, message, cb) {
+    this.setState({ message: { type: variant, content: message, open: true } }, cb);
     setTimeout(() => this.setState({ message: { type: '', content: '', open: false } }), 5000);
   }
 
@@ -89,10 +68,14 @@ class App extends Component {
       url: this.state.url,
       service: this.state.service,
       filename: this.state.filename
-    }).catch(err => {
-      const errMessage = err.response.data.msg ? `: ${err.response.data.msg}` : '';
-      this.showMessage('error', `Request failed with status ${err.response.status}${errMessage}`, false);
-    });
+    })
+      .then(res => {
+        this.showMessage('info', res.data.msg);
+      })
+      .catch(err => {
+        const errMessage = err.response.data.msg ? `: ${err.response.data.msg}` : '';
+        this.showMessage('error', `Request failed with status ${err.response.status}${errMessage}`);
+      });
   }
 
   getAuthUrls() {
@@ -117,7 +100,6 @@ class App extends Component {
       this.setState({
         auth: new Set(),
         isReconnecting: false,
-        isProcessing: false,
         message: { type: '', content: '', open: false }
       });
     });
@@ -126,68 +108,61 @@ class App extends Component {
       this.setState({ socketId });
     });
 
-    Realtime.on('maxRequestsExceeded', async () => {
-      let secs = 60;
-      do {
-        if (!this.state.isReconnecting) {
-          this.showMessage('error', `Max number of requests exceeded, please wait for ${secs}s`, true);
-        }
-        secs--;
-        await utils.sleep(1000);
-      } while (secs > 0);
-      this.setState({
-        message: { type: '', content: '' },
-        isProcessing: false
-      });
-    });
-
-    Realtime.on('downloadStart', () => {
+    Realtime.on('job:downloadStart', info => {
+      const { jobId } = info;
       this.showMessage('info', 'Downloading file to server');
     });
 
-    Realtime.on('downloadDone', () => {
+    Realtime.on('job:downloadDone', info => {
+      const { jobId } = info;
       this.showMessage('success', 'Downloaded file to server');
     });
 
-    Realtime.on('downloadError', err => {
+    Realtime.on('job:downloadError', err => {
+      const { jobId } = err;
       this.showMessage('error', `File download error: ${err.message}`, false);
     });
 
-    Realtime.on('validateStart', () => {
+    Realtime.on('job:validateStart', info => {
+      const { jobId } = info;
       this.showMessage('info', 'Validating file');
     });
 
-    Realtime.on('validateDone', () => {
+    Realtime.on('job:validateDone', info => {
+      const { jobId } = info;
       this.showMessage('success', 'File is valid');
     });
 
-    Realtime.on('validateError', err => {
-      this.showMessage('error', `File is invalid: ${err.message}`, false);
+    Realtime.on('job:validateError', err => {
+      const { jobId } = err;
+      this.showMessage('error', `File is invalid: ${err.message}`);
     });
 
-    Realtime.on('saveToCloudStart', service => {
-      this.showMessage('info', `Saving file to ${service.name}`);
+    Realtime.on('job:saveToCloudStart', info => {
+      const { jobId } = info;
+      this.showMessage('info', `Saving file to ${info.name}`);
     });
 
-    Realtime.on('saveToCloudDone', fileInfo => {
+    Realtime.on('job:saveToCloudDone', info => {
+      const { jobId } = info;
       const fileHistory = [...this.state.fileHistory];
       fileHistory.unshift({
-        id: fileInfo.id,
-        name: fileInfo.name,
-        url: fileInfo.url
+        id: info.id,
+        name: info.name,
+        url: info.url
       });
       this.showMessage('success', 'File is saved', () => {
         this.setState({
           url: '',
           filename: '',
-          isProcessing: false,
           fileHistory
         });
       });
     });
 
-    Realtime.on('saveToCloudError', err => {
-      this.showMessage('error', `File save error: ${err.message}`, false);
+    Realtime.on('job:saveToCloudError', err => {
+      const { jobId } = err;
+      this.showMessage('error', `File save error: ${err.message}`);
     });
 
     Realtime.on('onedrive:authenticated', () => {
@@ -234,10 +209,7 @@ class App extends Component {
 
     Realtime.on('connect_error', async () => {
       this.showMessage('error', 'Server connection error, reconnecting...', () => {
-        this.setState({
-          isProcessing: true,
-          isReconnecting: true
-        });
+        this.setState({ isReconnecting: true });
       });
     });
   }
@@ -246,7 +218,7 @@ class App extends Component {
     return (
       <React.Fragment>
         <MessageBar message={this.state.message} />
-        <LinearProgress style={{ display: this.state.isProcessing ? 'block' : 'none' }} />
+        <LinearProgress style={{ display: this.state.isReconnecting ? 'block' : 'none' }} />
         <Card>
           <CardContent>
             <Header />
@@ -259,7 +231,7 @@ class App extends Component {
                 <InputService value={this.state.service} services={services} onChange={this.handleChangeInput} />
               </Grid>
               <Grid item xs={2} className="container-center">
-                <BtnSave disabled={this.state.isProcessing} onClick={this.handleClickSave} />
+                <BtnSave onClick={this.handleClickSave} />
               </Grid>
             </Grid>
             <InputFilename value={this.state.filename} onChange={this.handleChangeInput} />
