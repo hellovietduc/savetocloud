@@ -14,8 +14,9 @@ function FileHistory(props) {
         </div>
       ) : null}
       {props.files.map(file => (
-        <div key={file.id} className="download">
-          <a href={file.url}>{file.name}</a>
+        <div key={file.id} className="file">
+          <span>{file.name} | </span>
+          <span>{file.status}</span>
         </div>
       ))}
     </section>
@@ -26,8 +27,8 @@ FileHistory.propTypes = {
   files: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
-      url: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired
+      name: PropTypes.string.isRequired,
+      status: PropTypes.string.isRequired
     })
   ).isRequired
 };

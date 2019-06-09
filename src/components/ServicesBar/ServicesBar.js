@@ -7,7 +7,7 @@ import utils from '../../helper/utils';
 import './ServicesBar.css';
 
 function ServicesBar(props) {
-  const { auth, urls } = props;
+  const { auth, urls, Realtime } = props;
   const services = [];
   for (const serviceCode in urls) {
     const service = {
@@ -33,7 +33,10 @@ function ServicesBar(props) {
               <img
                 src={env.PUBLIC_URL + `/img/${service.code}${service.loggedIn ? '' : '-bw'}.png`}
                 alt={service.name}
-                onClick={() => window.open(service.authUrl, '_blank')}
+                onClick={() => {
+                  window.open(service.authUrl, '_blank');
+                  Realtime.emit(`${service.code}:authenticating`);
+                }}
               />
             </Tooltip>
             {service.loggedIn ? <img src={env.PUBLIC_URL + '/img/tick.png'} alt="tick" className="tick-icon" /> : null}
@@ -46,7 +49,8 @@ function ServicesBar(props) {
 
 ServicesBar.propTypes = {
   auth: PropTypes.object.isRequired,
-  urls: PropTypes.object.isRequired
+  urls: PropTypes.object.isRequired,
+  Realtime: PropTypes.object.isRequired
 };
 
 export default ServicesBar;

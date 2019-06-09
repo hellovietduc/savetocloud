@@ -3,14 +3,6 @@
   text-align: center;
 }
 
-.download {
+.file {
   margin: 10px 0;
-}
-
-.download a {
-  text-decoration: none;
-}
-
-.download a:hover {
-  text-decoration: underline;
 }

@@ -13,7 +13,6 @@ import InputFilename from './components/InputFilename';
 import BtnSave from './components/BtnSave';
 import FileHistory from './components/FileHistory';
 import Footer from './components/Footer';
-import API from './services/api';
 import Realtime from './services/realtime';
 import { services } from './config/constants';
 import utils from './helper/utils';
@@ -25,12 +24,12 @@ class App extends Component {
     this.state = {
       socketId: '',
       auth: new Set(),
-      isReconnecting: false,
+      message: { type: '', content: '', open: false },
       url: '',
       service: services[0].value,
       filename: '',
-      message: { type: '', content: '', open: false },
-      fileHistory: []
+      fileHistory: [],
+      isReconnecting: false
     };
     this.handleChangeInput = this.handleChangeInput.bind(this);
     this.handleClickSave = this.handleClickSave.bind(this);
@@ -63,19 +62,15 @@ class App extends Component {
   }
 
   postRequest() {
-    API.post('/files', {
-      socketId: this.state.socketId,
+    Realtime.emit('newUpload', {
       url: this.state.url,
       service: this.state.service,
       filename: this.state.filename
-    })
-      .then(res => {
-        this.showMessage('info', res.data.msg);
-      })
-      .catch(err => {
-        const errMessage = err.response.data.msg ? `: ${err.response.data.msg}` : '';
-        this.showMessage('error', `Request failed with status ${err.response.status}${errMessage}`);
-      });
+    });
+    this.setState({
+      url: '',
+      filename: ''
+    });
   }
 
   getAuthUrls() {
@@ -99,70 +94,13 @@ class App extends Component {
     Realtime.on('connect', () => {
       this.setState({
         auth: new Set(),
-        isReconnecting: false,
-        message: { type: '', content: '', open: false }
+        message: { type: '', content: '', open: false },
+        isReconnecting: false
       });
     });
 
     Realtime.on('socketId', socketId => {
       this.setState({ socketId });
-    });
-
-    Realtime.on('job:downloadStart', info => {
-      const { jobId } = info;
-      this.showMessage('info', 'Downloading file to server');
-    });
-
-    Realtime.on('job:downloadDone', info => {
-      const { jobId } = info;
-      this.showMessage('success', 'Downloaded file to server');
-    });
-
-    Realtime.on('job:downloadError', err => {
-      const { jobId } = err;
-      this.showMessage('error', `File download error: ${err.message}`, false);
-    });
-
-    Realtime.on('job:validateStart', info => {
-      const { jobId } = info;
-      this.showMessage('info', 'Validating file');
-    });
-
-    Realtime.on('job:validateDone', info => {
-      const { jobId } = info;
-      this.showMessage('success', 'File is valid');
-    });
-
-    Realtime.on('job:validateError', err => {
-      const { jobId } = err;
-      this.showMessage('error', `File is invalid: ${err.message}`);
-    });
-
-    Realtime.on('job:saveToCloudStart', info => {
-      const { jobId } = info;
-      this.showMessage('info', `Saving file to ${info.name}`);
-    });
-
-    Realtime.on('job:saveToCloudDone', info => {
-      const { jobId } = info;
-      const fileHistory = [...this.state.fileHistory];
-      fileHistory.unshift({
-        id: info.id,
-        name: info.name,
-        url: info.url
-      });
-      this.showMessage('success', 'File is saved', () => {
-        this.setState({
-          url: '',
-          filename: '',
-          fileHistory
-        });
-      });
-    });
-
-    Realtime.on('job:saveToCloudError', err => {
-      const { jobId } = err;
-      this.showMessage('error', `File save error: ${err.message}`);
     });
 
     Realtime.on('onedrive:authenticated', () => {
@@ -207,6 +145,58 @@ class App extends Component {
       setTimeout(this.removeAuth, 3600000, 'google-drive');
     });
 
+    Realtime.on('invalidUpload', err => {
+      this.showMessage('error', err.message);
+    });
+
+    Realtime.on('queue:newPendingJob', data => {
+      const { jobId, filename } = data;
+      this.showMessage('info', `Upload added to the queue: ${filename}`);
+      const newFileHistory = [...this.state.fileHistory];
+      newFileHistory.unshift({
+        id: jobId,
+        name: filename,
+        status: 'pending'
+      });
+      this.setState({ fileHistory: newFileHistory });
+    });
+
+    Realtime.on('queue:jobProcessing', data => {
+      const { jobId, filename } = data;
+      this.showMessage('info', `Processing upload: ${filename}`);
+      const newFileHistory = [...this.state.fileHistory];
+      const file = newFileHistory.find(one => one.id === jobId);
+      file.status = 'uploading';
+      this.setState({ fileHistory: newFileHistory });
+    });
+
+    Realtime.on('queue:jobDone', data => {
+      const { jobId, filename } = data;
+      this.showMessage('info', `Upload done: ${filename}`);
+      const newFileHistory = [...this.state.fileHistory];
+      const file = newFileHistory.find(one => one.id === jobId);
+      file.status = 'completed';
+      this.setState({ fileHistory: newFileHistory });
+    });
+
+    Realtime.on('queue:jobRetry', data => {
+      const { jobId, filename } = data;
+      this.showMessage('info', `Retry upload: ${filename}`);
+      const newFileHistory = [...this.state.fileHistory];
+      const file = newFileHistory.find(one => one.id === jobId);
+      file.status = 'retrying';
+      this.setState({ fileHistory: newFileHistory });
+    });
+
+    Realtime.on('queue:jobFailed', data => {
+      const { jobId, filename } = data;
+      this.showMessage('info', `Upload failed: ${filename}`);
+      const newFileHistory = [...this.state.fileHistory];
+      const file = newFileHistory.find(one => one.id === jobId);
+      file.status = 'failed';
+      this.setState({ fileHistory: newFileHistory });
+    });
+
     Realtime.on('connect_error', async () => {
       this.showMessage('error', 'Server connection error, reconnecting...', () => {
         this.setState({ isReconnecting: true });
@@ -222,7 +212,7 @@ class App extends Component {
         <Card>
           <CardContent>
             <Header />
-            <ServicesBar auth={this.state.auth} urls={this.getAuthUrls()} />
+            <ServicesBar auth={this.state.auth} urls={this.getAuthUrls()} Realtime={Realtime} />
             <Grid container spacing={1} justify="space-around">
               <Grid item xs={7}>
                 <InputUrl value={this.state.url} onChange={this.handleChangeInput} />
