@@ -31,7 +31,7 @@ function UploadHistory(props) {
           {props.files.map((file, index) => (
             <TableRow key={file.id} hover={true}>
               <TableCell>{index + 1}</TableCell>
-              <TableCell>{utils.trimFilename(file.name, 20)}</TableCell>
+              <TableCell>{utils.trimFilename(file.name, 25)}</TableCell>
               <TableCell>{file.service}</TableCell>
               <TableCell>{file.size || '?'}</TableCell>
               <TableCell>{file.speed || '?'}</TableCell>

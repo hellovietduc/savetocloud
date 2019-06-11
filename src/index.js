@@ -22,16 +22,18 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isReconnecting: false,
       socketId: '',
       auth: new Set(),
       message: { type: '', content: '', open: false },
       url: '',
       service: services[0].value,
       filename: '',
-      uploadHistory: [],
-      isReconnecting: false
+      changeFilename: false,
+      uploadHistory: []
     };
     this.handleChangeInput = this.handleChangeInput.bind(this);
+    this.toggleChangeFilename = this.toggleChangeFilename.bind(this);
     this.handleClickSave = this.handleClickSave.bind(this);
     this.showMessage = this.showMessage.bind(this);
     this.postRequest = this.postRequest.bind(this);
@@ -43,17 +45,27 @@ class App extends Component {
     return event => this.setState({ [name]: event.target.value });
   }
 
+  toggleChangeFilename() {
+    this.setState({ changeFilename: !this.state.changeFilename });
+  }
+
   handleClickSave() {
     const url = utils.formatUrl(this.state.url);
     if (!url) {
       return this.showMessage('error', 'Please enter a valid URL');
     }
-
     this.setState({ url });
-    if (this.state.auth.has(this.state.service)) return this.postRequest();
 
-    const serviceName = utils.getServiceName(this.state.service);
-    this.showMessage('error', `Please login by clicking on the ${serviceName} icon first`);
+    if (!this.state.auth.has(this.state.service)) {
+      const serviceName = utils.getServiceName(this.state.service);
+      return this.showMessage('error', `Please login by clicking on the ${serviceName} icon first`);
+    }
+
+    if (this.state.changeFilename && !this.state.filename.trim()) {
+      return this.showMessage('error', 'Please enter filename');
+    }
+
+    this.postRequest();
   }
 
   showMessage(variant, message, cb) {
@@ -93,9 +105,9 @@ class App extends Component {
   componentDidMount() {
     Realtime.on('connect', () => {
       this.setState({
+        isReconnecting: false,
         auth: new Set(),
-        message: { type: '', content: '', open: false },
-        isReconnecting: false
+        message: { type: '', content: '', open: false }
       });
     });
 
@@ -225,7 +237,12 @@ class App extends Component {
                 <BtnSave onClick={this.handleClickSave} />
               </Grid>
             </Grid>
-            <InputFilename value={this.state.filename} onChange={this.handleChangeInput} />
+            <InputFilename
+              disabled={!this.state.changeFilename}
+              value={this.state.filename}
+              onChange={this.handleChangeInput}
+              onToggle={this.toggleChangeFilename}
+            />
             <UploadHistory files={this.state.uploadHistory} />
           </CardContent>
         </Card>
