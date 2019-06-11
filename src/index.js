@@ -14,7 +14,7 @@ import BtnSave from './components/BtnSave';
 import UploadHistory from './components/UploadHistory';
 import Footer from './components/Footer';
 import Realtime from './services/realtime';
-import { services } from './config/constants';
+import { SERVICES } from './config/enum';
 import utils from './helper/utils';
 import './index.css';
 
@@ -27,7 +27,7 @@ class App extends Component {
       auth: new Set(),
       message: { type: '', content: '', open: false },
       url: '',
-      service: services[0].value,
+      service: SERVICES[0].value,
       filename: '',
       changeFilename: false,
       uploadHistory: []
@@ -87,7 +87,7 @@ class App extends Component {
 
   getAuthUrls() {
     const urls = {};
-    for (const service of services) {
+    for (const service of SERVICES) {
       urls[service.value] = utils.getAuthUrl(service.value, this.state.socketId);
     }
     return urls;
@@ -115,46 +115,46 @@ class App extends Component {
       this.setState({ socketId });
     });
 
-    Realtime.on('onedrive:authenticated', () => {
+    Realtime.on('ONEDRIVE:authenticated', () => {
       const newAuth = new Set();
       const entries = this.state.auth.entries();
       for (const entry of entries) {
         newAuth.add(entry[0]);
       }
-      newAuth.add('onedrive');
+      newAuth.add('ONEDRIVE');
       this.setState({
         auth: newAuth,
         message: { type: '', content: '', open: false }
       });
-      setTimeout(this.removeAuth, 3600000, 'onedrive');
+      setTimeout(this.removeAuth, 3600000, 'ONEDRIVE');
     });
 
-    Realtime.on('dropbox:authenticated', () => {
+    Realtime.on('DROPBOX:authenticated', () => {
       const newAuth = new Set();
       const entries = this.state.auth.entries();
       for (const entry of entries) {
         newAuth.add(entry[0]);
       }
-      newAuth.add('dropbox');
+      newAuth.add('DROPBOX');
       this.setState({
         auth: newAuth,
         message: { type: '', content: '', open: false }
       });
-      setTimeout(this.removeAuth, 3600000, 'dropbox');
+      setTimeout(this.removeAuth, 3600000, 'DROPBOX');
     });
 
-    Realtime.on('google-drive:authenticated', () => {
+    Realtime.on('GOOGLE_DRIVE:authenticated', () => {
       const newAuth = new Set();
       const entries = this.state.auth.entries();
       for (const entry of entries) {
         newAuth.add(entry[0]);
       }
-      newAuth.add('google-drive');
+      newAuth.add('GOOGLE_DRIVE');
       this.setState({
         auth: newAuth,
         message: { type: '', content: '', open: false }
       });
-      setTimeout(this.removeAuth, 3600000, 'google-drive');
+      setTimeout(this.removeAuth, 3600000, 'GOOGLE_DRIVE');
     });
 
     Realtime.on('invalidUpload', err => {
@@ -231,7 +231,7 @@ class App extends Component {
                 <InputUrl value={this.state.url} onChange={this.handleChangeInput} />
               </Grid>
               <Grid item xs={3}>
-                <InputService value={this.state.service} services={services} onChange={this.handleChangeInput} />
+                <InputService value={this.state.service} services={SERVICES} onChange={this.handleChangeInput} />
               </Grid>
               <Grid item xs={2} className="container-center">
                 <BtnSave onClick={this.handleClickSave} />

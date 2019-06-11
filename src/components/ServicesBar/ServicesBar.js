@@ -31,7 +31,7 @@ function ServicesBar(props) {
           <Grid item xs={4} key={service.code} className="service">
             <Tooltip title={`${service.name} - ${service.loggedIn ? 'Logged In' : 'Logged Out'}`}>
               <img
-                src={env.PUBLIC_URL + `/img/${service.code}${service.loggedIn ? '' : '-bw'}.png`}
+                src={env.PUBLIC_URL + `/img/${service.code.toLowerCase()}${service.loggedIn ? '' : '-bw'}.png`}
                 alt={service.name}
                 onClick={() => {
                   window.open(service.authUrl, '_blank');
