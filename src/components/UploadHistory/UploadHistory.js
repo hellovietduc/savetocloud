@@ -22,23 +22,31 @@ function UploadHistory(props) {
             <TableCell>Filename</TableCell>
             <TableCell>Service</TableCell>
             <TableCell>Size</TableCell>
-            <TableCell>Speed</TableCell>
-            <TableCell>Time left</TableCell>
+            <TableCell>Progress</TableCell>
             <TableCell>Status</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {props.files.map((file, index) => (
-            <TableRow key={file.id} hover={true}>
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>{utils.trimFilename(file.name, 25)}</TableCell>
-              <TableCell>{file.service}</TableCell>
-              <TableCell>{file.size || '?'}</TableCell>
-              <TableCell>{file.speed || '?'}</TableCell>
-              <TableCell>{file.timeLeft || '?'}</TableCell>
-              <TableCell className={file.status}>{file.status}</TableCell>
-            </TableRow>
-          ))}
+          {props.files.map((file, index) => {
+            const cell = {
+              index: index + 1,
+              name: utils.trimFilename(file.name, 25),
+              service: file.service,
+              size: file.size || '?',
+              progress: file.status === 'completed' ? '100%' : file.progress ? `${file.progress}%` : '?',
+              status: file.status
+            };
+            return (
+              <TableRow key={file.id} hover={true}>
+                <TableCell>{cell.index}</TableCell>
+                <TableCell>{cell.name}</TableCell>
+                <TableCell>{cell.service}</TableCell>
+                <TableCell>{cell.size}</TableCell>
+                <TableCell>{cell.progress}</TableCell>
+                <TableCell className={cell.status}>{cell.status}</TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </section>
@@ -51,9 +59,8 @@ UploadHistory.propTypes = {
       id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       service: PropTypes.string,
-      size: PropTypes.number,
-      speed: PropTypes.number,
-      timeLeft: PropTypes.number,
+      size: PropTypes.string,
+      progress: PropTypes.number,
       status: PropTypes.string.isRequired
     })
   ).isRequired

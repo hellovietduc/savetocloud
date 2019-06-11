@@ -210,6 +210,33 @@ class App extends Component {
       this.setState({ uploadHistory: newUploadHistory });
     });
 
+    Realtime.on('job:downloadDone', data => {
+      const { jobId, fileSize } = data;
+      if (!fileSize) return;
+      const newUploadHistory = [...this.state.uploadHistory];
+      const file = newUploadHistory.find(one => one.id === jobId);
+      file.size = fileSize;
+      this.setState({ uploadHistory: newUploadHistory });
+    });
+
+    Realtime.on('job:saveToCloudDone', data => {
+      const { jobId, fileSize } = data;
+      if (!fileSize) return;
+      const newUploadHistory = [...this.state.uploadHistory];
+      const file = newUploadHistory.find(one => one.id === jobId);
+      file.size = fileSize;
+      this.setState({ uploadHistory: newUploadHistory });
+    });
+
+    Realtime.on('job:uploadProgress', data => {
+      const { jobId, progress } = data;
+      if (!progress) return;
+      const newUploadHistory = [...this.state.uploadHistory];
+      const file = newUploadHistory.find(one => one.id === jobId);
+      file.progress = progress;
+      this.setState({ uploadHistory: newUploadHistory });
+    });
+
     Realtime.on('connect_error', async () => {
       this.showMessage('error', 'Server connection error, reconnecting...', () => {
         this.setState({ isReconnecting: true });
