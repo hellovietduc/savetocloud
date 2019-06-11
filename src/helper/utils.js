@@ -10,6 +10,22 @@ const regex = {
 export default {
   sleep: t => new Promise(r => setTimeout(r, t)),
 
+  trimFilename: (filename, maxLength) => {
+    if (filename.length <= maxLength) return filename;
+    const charNum = maxLength - 3;
+    const head = [];
+    const tail = [];
+    filename = filename.split('');
+    for (let i = 0; i < charNum; i++) {
+      if (i % 2 === 0) {
+        head.push(filename.shift());
+      } else {
+        tail.unshift(filename.pop());
+      }
+    }
+    return head.join('') + '...' + tail.join('');
+  },
+
   getServiceName: serviceCode => services.find(s => s.value === serviceCode).label,
 
   getAuthUrl: (serviceCode, socketId) => {

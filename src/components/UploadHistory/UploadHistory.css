@@ -1,0 +1,22 @@
+.upload-history {
+  margin-top: 30px;
+  width: 100%;
+  overflow-x: auto;
+  text-align: center;
+}
+
+.pending {
+  color: #ffa500 !important;
+}
+
+.completed {
+  color: #008000 !important;
+}
+
+.retrying {
+  color: #800080 !important;
+}
+
+.failed {
+  color: #ff0000 !important;
+}

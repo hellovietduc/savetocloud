@@ -11,7 +11,7 @@ import InputUrl from './components/InputUrl';
 import InputService from './components/InputService';
 import InputFilename from './components/InputFilename';
 import BtnSave from './components/BtnSave';
-import FileHistory from './components/FileHistory';
+import UploadHistory from './components/UploadHistory';
 import Footer from './components/Footer';
 import Realtime from './services/realtime';
 import { services } from './config/constants';
@@ -28,7 +28,7 @@ class App extends Component {
       url: '',
       service: services[0].value,
       filename: '',
-      fileHistory: [],
+      uploadHistory: [],
       isReconnecting: false
     };
     this.handleChangeInput = this.handleChangeInput.bind(this);
@@ -150,51 +150,52 @@ class App extends Component {
     });
 
     Realtime.on('queue:newPendingJob', data => {
-      const { jobId, filename } = data;
+      const { jobId, filename, serviceCode } = data;
       this.showMessage('info', `Upload added to the queue: ${filename}`);
-      const newFileHistory = [...this.state.fileHistory];
-      newFileHistory.unshift({
+      const newUploadHistory = [...this.state.uploadHistory];
+      newUploadHistory.unshift({
         id: jobId,
         name: filename,
+        service: utils.getServiceName(serviceCode),
         status: 'pending'
       });
-      this.setState({ fileHistory: newFileHistory });
+      this.setState({ uploadHistory: newUploadHistory });
     });
 
     Realtime.on('queue:jobProcessing', data => {
       const { jobId, filename } = data;
       this.showMessage('info', `Processing upload: ${filename}`);
-      const newFileHistory = [...this.state.fileHistory];
-      const file = newFileHistory.find(one => one.id === jobId);
+      const newUploadHistory = [...this.state.uploadHistory];
+      const file = newUploadHistory.find(one => one.id === jobId);
       file.status = 'uploading';
-      this.setState({ fileHistory: newFileHistory });
+      this.setState({ uploadHistory: newUploadHistory });
     });
 
     Realtime.on('queue:jobDone', data => {
       const { jobId, filename } = data;
       this.showMessage('info', `Upload done: ${filename}`);
-      const newFileHistory = [...this.state.fileHistory];
-      const file = newFileHistory.find(one => one.id === jobId);
+      const newUploadHistory = [...this.state.uploadHistory];
+      const file = newUploadHistory.find(one => one.id === jobId);
       file.status = 'completed';
-      this.setState({ fileHistory: newFileHistory });
+      this.setState({ uploadHistory: newUploadHistory });
     });
 
     Realtime.on('queue:jobRetry', data => {
       const { jobId, filename } = data;
       this.showMessage('info', `Retry upload: ${filename}`);
-      const newFileHistory = [...this.state.fileHistory];
-      const file = newFileHistory.find(one => one.id === jobId);
+      const newUploadHistory = [...this.state.uploadHistory];
+      const file = newUploadHistory.find(one => one.id === jobId);
       file.status = 'retrying';
-      this.setState({ fileHistory: newFileHistory });
+      this.setState({ uploadHistory: newUploadHistory });
     });
 
     Realtime.on('queue:jobFailed', data => {
       const { jobId, filename } = data;
       this.showMessage('info', `Upload failed: ${filename}`);
-      const newFileHistory = [...this.state.fileHistory];
-      const file = newFileHistory.find(one => one.id === jobId);
+      const newUploadHistory = [...this.state.uploadHistory];
+      const file = newUploadHistory.find(one => one.id === jobId);
       file.status = 'failed';
-      this.setState({ fileHistory: newFileHistory });
+      this.setState({ uploadHistory: newUploadHistory });
     });
 
     Realtime.on('connect_error', async () => {
@@ -225,7 +226,7 @@ class App extends Component {
               </Grid>
             </Grid>
             <InputFilename value={this.state.filename} onChange={this.handleChangeInput} />
-            <FileHistory files={this.state.fileHistory} />
+            <UploadHistory files={this.state.uploadHistory} />
           </CardContent>
         </Card>
         <Footer />
