@@ -32,7 +32,7 @@ function UploadHistory(props) {
             const cell = {
               index: index + 1,
               name: utils.trimFilename(file.name, 25),
-              service: file.service,
+              serviceName: file.serviceName,
               size: file.size || '?',
               progress: file.status === 'completed' ? '100%' : file.progress ? `${file.progress}%` : '?',
               status: file.status
@@ -41,7 +41,7 @@ function UploadHistory(props) {
               <TableRow key={file.id} hover={true}>
                 <TableCell>{cell.index}</TableCell>
                 <TableCell>{cell.name}</TableCell>
-                <TableCell>{cell.service}</TableCell>
+                <TableCell>{cell.serviceName}</TableCell>
                 <TableCell>{cell.size}</TableCell>
                 <TableCell>{cell.progress}</TableCell>
                 <TableCell className={cell.status}>{cell.status}</TableCell>
@@ -66,7 +66,7 @@ UploadHistory.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
-      service: PropTypes.string,
+      serviceName: PropTypes.string,
       size: PropTypes.string,
       progress: PropTypes.number,
       status: PropTypes.string.isRequired

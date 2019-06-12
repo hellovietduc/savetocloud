@@ -1,5 +1,5 @@
 import base64url from 'base64url';
-import { SERVICES } from '../config/enum';
+import { SERVICES, SERVICE_CODES } from '../config/enum';
 import env from '../config/env';
 import GoogleAuth from './google-auth';
 
@@ -29,8 +29,8 @@ export default {
   getServiceName: serviceCode => SERVICES.find(s => s.value === serviceCode).label,
 
   getAuthUrl: (serviceCode, socketId) => {
-    if (serviceCode === 'ONEDRIVE') {
-      const state = base64url.encode(JSON.stringify({ socketId, serviceCode: 'ONEDRIVE' }));
+    if (serviceCode === SERVICE_CODES.ONEDRIVE) {
+      const state = base64url.encode(JSON.stringify({ socketId, serviceCode: SERVICE_CODES.ONEDRIVE }));
       return (
         'https://login.microsoftonline.com/common/oauth2/v2.0/authorize' +
         `?client_id=${env.ONEDRIVE_APP_ID}` +
@@ -40,8 +40,8 @@ export default {
         `&state=${state}`
       );
     }
-    if (serviceCode === 'DROPBOX') {
-      const state = base64url.encode(JSON.stringify({ socketId, serviceCode: 'DROPBOX' }));
+    if (serviceCode === SERVICE_CODES.DROPBOX) {
+      const state = base64url.encode(JSON.stringify({ socketId, serviceCode: SERVICE_CODES.DROPBOX }));
       return (
         'https://www.dropbox.com/oauth2/authorize' +
         `?client_id=${env.DROPBOX_APP_ID}` +
@@ -50,9 +50,9 @@ export default {
         `&state=${state}`
       );
     }
-    if (serviceCode === 'GOOGLE_DRIVE') {
+    if (serviceCode === SERVICE_CODES.GOOGLE_DRIVE) {
       const client = GoogleAuth.getClient();
-      const state = base64url.encode(JSON.stringify({ socketId, serviceCode: 'GOOGLE_DRIVE' }));
+      const state = base64url.encode(JSON.stringify({ socketId, serviceCode: SERVICE_CODES.GOOGLE_DRIVE }));
       return GoogleAuth.getAuthUrl(client, ['https://www.googleapis.com/auth/drive']) + `&state=${state}`;
     }
   },
