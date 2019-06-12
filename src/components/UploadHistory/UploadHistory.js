@@ -6,6 +6,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
+import Button from '@material-ui/core/Button';
 import utils from '../../helper/utils';
 import './UploadHistory.css';
 
@@ -15,7 +16,7 @@ function UploadHistory(props) {
       <Typography variant="h5" gutterBottom>
         Upload history
       </Typography>
-      <Table className="table">
+      <Table>
         <TableHead>
           <TableRow>
             <TableCell>#</TableCell>
@@ -49,6 +50,13 @@ function UploadHistory(props) {
           })}
         </TableBody>
       </Table>
+      {props.files.length > 0 ? (
+        <div className="btn-clear">
+          <Button onClick={props.onClear} size="small" color="secondary">
+            Clear
+          </Button>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -63,7 +71,8 @@ UploadHistory.propTypes = {
       progress: PropTypes.number,
       status: PropTypes.string.isRequired
     })
-  ).isRequired
+  ).isRequired,
+  onClear: PropTypes.func.isRequired
 };
 
 export default UploadHistory;

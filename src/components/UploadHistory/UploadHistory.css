@@ -20,3 +20,7 @@
 .failed {
   color: #ff0000 !important;
 }
+
+.btn-clear {
+  float: right;
+}

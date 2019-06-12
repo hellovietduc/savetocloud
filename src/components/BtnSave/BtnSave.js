@@ -6,7 +6,7 @@ import './BtnSave.css';
 
 function BtnSave(props) {
   return (
-    <Button disabled={props.disabled} onClick={props.onClick} size="large" variant="contained">
+    <Button disabled={props.disabled} onClick={props.onClick} size="large" fullWidth={true} variant="contained">
       Save
       <CloudUploadIcon className="icon-cloud-upload" />
     </Button>

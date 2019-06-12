@@ -35,6 +35,7 @@ class App extends Component {
     this.handleChangeInput = this.handleChangeInput.bind(this);
     this.toggleChangeFilename = this.toggleChangeFilename.bind(this);
     this.handleClickSave = this.handleClickSave.bind(this);
+    this.handleClearUploadHistory = this.handleClearUploadHistory.bind(this);
     this.showMessage = this.showMessage.bind(this);
     this.postRequest = this.postRequest.bind(this);
     this.getAuthUrls = this.getAuthUrls.bind(this);
@@ -66,6 +67,11 @@ class App extends Component {
     }
 
     this.postRequest();
+  }
+
+  handleClearUploadHistory() {
+    const newUploadHistory = this.state.uploadHistory.filter(upload => upload.status !== 'completed');
+    this.setState({ uploadHistory: newUploadHistory });
   }
 
   showMessage(variant, message, cb) {
@@ -261,7 +267,7 @@ class App extends Component {
                 <InputService value={this.state.service} services={SERVICES} onChange={this.handleChangeInput} />
               </Grid>
               <Grid item xs={2} className="container-center">
-                <BtnSave onClick={this.handleClickSave} />
+                <BtnSave disabled={this.state.isReconnecting} onClick={this.handleClickSave} />
               </Grid>
             </Grid>
             <InputFilename
@@ -270,7 +276,7 @@ class App extends Component {
               onChange={this.handleChangeInput}
               onToggle={this.toggleChangeFilename}
             />
-            <UploadHistory files={this.state.uploadHistory} />
+            <UploadHistory files={this.state.uploadHistory} onClear={this.handleClearUploadHistory} />
           </CardContent>
         </Card>
         <Footer />
