@@ -2,7 +2,7 @@ import { google } from 'googleapis';
 import env from '../config/env';
 
 export default {
-  getClient: () => new google.auth.OAuth2(env.GOOGLE_DRIVE_APP_ID, env.GOOGLE_DRIVE_APP_PASSWD, env.AUTH_REDIRECT_URI),
+  getClient: () => new google.auth.OAuth2(env.GOOGLE_DRIVE_APP_ID, env.GOOGLE_DRIVE_APP_PASSWD, env.AUTH_REDIRECT_URL),
 
   getAuthUrl: (client, scopes) =>
     client.generateAuthUrl({

@@ -14,7 +14,8 @@ import BtnSave from './components/BtnSave';
 import UploadHistory from './components/UploadHistory';
 import Footer from './components/Footer';
 import Realtime from './services/realtime';
-import { SERVICES } from './config/enum';
+import { SERVICES, SERVICE_CODES, MESSAGES, UPLOAD_STATUS } from './config/enum';
+import env from './config/env';
 import utils from './helper/utils';
 import './index.css';
 
@@ -27,7 +28,7 @@ class App extends Component {
       auth: new Set(),
       message: { type: '', content: '', open: false },
       url: '',
-      service: SERVICES[0].value,
+      serviceCode: SERVICES[0].value,
       filename: '',
       changeFilename: false,
       uploadHistory: []
@@ -53,36 +54,36 @@ class App extends Component {
   handleClickSave() {
     const url = utils.formatUrl(this.state.url);
     if (!url) {
-      return this.showMessage('error', 'Please enter a valid URL');
+      return this.showMessage('error', MESSAGES.INVALID_URL);
     }
     this.setState({ url });
 
-    if (!this.state.auth.has(this.state.service)) {
-      const serviceName = utils.getServiceName(this.state.service);
-      return this.showMessage('error', `Please login by clicking on the ${serviceName} icon first`);
+    if (!this.state.auth.has(this.state.serviceCode)) {
+      const serviceName = utils.getServiceName(this.state.serviceCode);
+      return this.showMessage('error', MESSAGES.NOT_LOGGED_IN(serviceName));
     }
 
     if (this.state.changeFilename && !this.state.filename.trim()) {
-      return this.showMessage('error', 'Please enter filename');
+      return this.showMessage('error', MESSAGES.INVALID_FILENAME);
     }
 
     this.postRequest();
   }
 
   handleClearUploadHistory() {
-    const newUploadHistory = this.state.uploadHistory.filter(upload => upload.status !== 'completed');
+    const newUploadHistory = this.state.uploadHistory.filter(upload => upload.status !== UPLOAD_STATUS.COMPLETED);
     this.setState({ uploadHistory: newUploadHistory });
   }
 
   showMessage(variant, message, cb) {
     this.setState({ message: { type: variant, content: message, open: true } }, cb);
-    setTimeout(() => this.setState({ message: { type: '', content: '', open: false } }), 5000);
+    setTimeout(() => this.setState({ message: { type: '', content: '', open: false } }), env.NOTI_DISP_TIME);
   }
 
   postRequest() {
     Realtime.emit('newUpload', {
       url: this.state.url,
-      service: this.state.service,
+      serviceCode: this.state.serviceCode,
       filename: this.state.filename
     });
     this.setState({
@@ -121,46 +122,20 @@ class App extends Component {
       this.setState({ socketId });
     });
 
-    Realtime.on('ONEDRIVE:authenticated', () => {
-      const newAuth = new Set();
-      const entries = this.state.auth.entries();
-      for (const entry of entries) {
-        newAuth.add(entry[0]);
-      }
-      newAuth.add('ONEDRIVE');
-      this.setState({
-        auth: newAuth,
-        message: { type: '', content: '', open: false }
+    Object.values(SERVICE_CODES).forEach(code => {
+      Realtime.on(`${code}:authenticated`, () => {
+        const newAuth = new Set();
+        const entries = this.state.auth.entries();
+        for (const entry of entries) {
+          newAuth.add(entry[0]);
+        }
+        newAuth.add(code);
+        this.setState({
+          auth: newAuth,
+          message: { type: '', content: '', open: false }
+        });
+        setTimeout(this.removeAuth, env.TOKEN_EXP_TIME, code);
       });
-      setTimeout(this.removeAuth, 3600000, 'ONEDRIVE');
-    });
-
-    Realtime.on('DROPBOX:authenticated', () => {
-      const newAuth = new Set();
-      const entries = this.state.auth.entries();
-      for (const entry of entries) {
-        newAuth.add(entry[0]);
-      }
-      newAuth.add('DROPBOX');
-      this.setState({
-        auth: newAuth,
-        message: { type: '', content: '', open: false }
-      });
-      setTimeout(this.removeAuth, 3600000, 'DROPBOX');
-    });
-
-    Realtime.on('GOOGLE_DRIVE:authenticated', () => {
-      const newAuth = new Set();
-      const entries = this.state.auth.entries();
-      for (const entry of entries) {
-        newAuth.add(entry[0]);
-      }
-      newAuth.add('GOOGLE_DRIVE');
-      this.setState({
-        auth: newAuth,
-        message: { type: '', content: '', open: false }
-      });
-      setTimeout(this.removeAuth, 3600000, 'GOOGLE_DRIVE');
     });
 
     Realtime.on('invalidUpload', err => {
@@ -169,50 +144,50 @@ class App extends Component {
 
     Realtime.on('queue:newPendingJob', data => {
       const { jobId, filename, serviceCode } = data;
-      this.showMessage('info', `Upload added to the queue: ${filename}`);
+      this.showMessage('info', MESSAGES.UPLOAD_ADDED(filename));
       const newUploadHistory = [...this.state.uploadHistory];
       newUploadHistory.unshift({
         id: jobId,
         name: filename,
-        service: utils.getServiceName(serviceCode),
-        status: 'pending'
+        serviceName: utils.getServiceName(serviceCode),
+        status: UPLOAD_STATUS.PENDING
       });
       this.setState({ uploadHistory: newUploadHistory });
     });
 
     Realtime.on('queue:jobProcessing', data => {
       const { jobId, filename } = data;
-      this.showMessage('info', `Processing upload: ${filename}`);
+      this.showMessage('info', MESSAGES.UPLOAD_PROCESSING(filename));
       const newUploadHistory = [...this.state.uploadHistory];
       const file = newUploadHistory.find(one => one.id === jobId);
-      file.status = 'uploading';
+      file.status = UPLOAD_STATUS.UPLOADING;
       this.setState({ uploadHistory: newUploadHistory });
     });
 
     Realtime.on('queue:jobDone', data => {
       const { jobId, filename } = data;
-      this.showMessage('info', `Upload done: ${filename}`);
+      this.showMessage('info', MESSAGES.UPLOAD_DONE(filename));
       const newUploadHistory = [...this.state.uploadHistory];
       const file = newUploadHistory.find(one => one.id === jobId);
-      file.status = 'completed';
+      file.status = UPLOAD_STATUS.COMPLETED;
       this.setState({ uploadHistory: newUploadHistory });
     });
 
     Realtime.on('queue:jobRetry', data => {
       const { jobId, filename } = data;
-      this.showMessage('info', `Retry upload: ${filename}`);
+      this.showMessage('info', MESSAGES.UPLOAD_RETRY(filename));
       const newUploadHistory = [...this.state.uploadHistory];
       const file = newUploadHistory.find(one => one.id === jobId);
-      file.status = 'retrying';
+      file.status = UPLOAD_STATUS.RETRYING;
       this.setState({ uploadHistory: newUploadHistory });
     });
 
     Realtime.on('queue:jobFailed', data => {
       const { jobId, filename } = data;
-      this.showMessage('info', `Upload failed: ${filename}`);
+      this.showMessage('info', MESSAGES.UPLOAD_FAILED(filename));
       const newUploadHistory = [...this.state.uploadHistory];
       const file = newUploadHistory.find(one => one.id === jobId);
-      file.status = 'failed';
+      file.status = UPLOAD_STATUS.FAILED;
       this.setState({ uploadHistory: newUploadHistory });
     });
 
@@ -244,7 +219,7 @@ class App extends Component {
     });
 
     Realtime.on('connect_error', async () => {
-      this.showMessage('error', 'Server connection error, reconnecting...', () => {
+      this.showMessage('error', MESSAGES.RECONNECTING, () => {
         this.setState({ isReconnecting: true });
       });
     });
@@ -264,7 +239,7 @@ class App extends Component {
                 <InputUrl value={this.state.url} onChange={this.handleChangeInput} />
               </Grid>
               <Grid item xs={3}>
-                <InputService value={this.state.service} services={SERVICES} onChange={this.handleChangeInput} />
+                <InputService value={this.state.serviceCode} services={SERVICES} onChange={this.handleChangeInput} />
               </Grid>
               <Grid item xs={2} className="container-center">
                 <BtnSave disabled={this.state.isReconnecting} onClick={this.handleClickSave} />

@@ -8,10 +8,9 @@ function InputService(props) {
     <TextField
       required
       select
-      id="service"
       label="Cloud Service"
       value={props.value}
-      onChange={props.onChange('service')}
+      onChange={props.onChange('serviceCode')}
       fullWidth
       margin="normal"
       variant="filled"
