@@ -1,5 +1,11 @@
-.author {
-  margin: 20px 0;
-  font-size: 80%;
+footer {
   text-align: center;
+}
+
+footer section {
+  margin-top: 20px;
+}
+
+.author {
+  font-size: 80%;
 }
