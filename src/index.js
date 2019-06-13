@@ -71,7 +71,9 @@ class App extends Component {
   }
 
   handleClearUploadHistory() {
-    const newUploadHistory = this.state.uploadHistory.filter(upload => upload.status !== UPLOAD_STATUS.COMPLETED);
+    const newUploadHistory = this.state.uploadHistory.filter(
+      upload => upload.status !== UPLOAD_STATUS.COMPLETED && upload.status !== UPLOAD_STATUS.FAILED
+    );
     this.setState({ uploadHistory: newUploadHistory });
   }
 
