@@ -36,7 +36,7 @@ export default {
         `?client_id=${env.ONEDRIVE_APP_ID}` +
         '&scope=files.readwrite' +
         '&response_type=token' +
-        `&redirect_uri=${env.AUTH_REDIRECT_URI}` +
+        `&redirect_uri=${env.AUTH_REDIRECT_URL}` +
         `&state=${state}`
       );
     }
@@ -46,7 +46,7 @@ export default {
         'https://www.dropbox.com/oauth2/authorize' +
         `?client_id=${env.DROPBOX_APP_ID}` +
         '&response_type=token' +
-        `&redirect_uri=${env.AUTH_REDIRECT_URI}` +
+        `&redirect_uri=${env.AUTH_REDIRECT_URL}` +
         `&state=${state}`
       );
     }
