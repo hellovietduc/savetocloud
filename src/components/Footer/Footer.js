@@ -18,7 +18,7 @@ function Footer() {
         </span>
       </section>
       <section className="author">
-        <p>2019 @vietduc01100001</p>
+        <p>ⓒ SaveToDrive, 2019</p>
       </section>
     </footer>
   );
