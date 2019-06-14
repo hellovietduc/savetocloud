@@ -1,8 +1,11 @@
 .upload-history {
   margin-top: 30px;
   width: 100%;
-  overflow-x: auto;
   text-align: center;
+}
+
+.upload-history .table {
+  overflow-x: auto;
 }
 
 .pending {

@@ -16,40 +16,42 @@ function UploadHistory(props) {
       <Typography variant="h5" gutterBottom>
         Upload history
       </Typography>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>#</TableCell>
-            <TableCell>Filename</TableCell>
-            <TableCell>Service</TableCell>
-            <TableCell>Size</TableCell>
-            <TableCell>Progress</TableCell>
-            <TableCell>Status</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {props.files.map((file, index) => {
-            const cell = {
-              index: index + 1,
-              name: utils.trimFilename(file.name, 25),
-              serviceName: file.serviceName,
-              size: file.size || '?',
-              progress: file.status === 'completed' ? '100%' : file.progress ? `${file.progress}%` : '?',
-              status: file.status
-            };
-            return (
-              <TableRow key={file.id} hover={true}>
-                <TableCell>{cell.index}</TableCell>
-                <TableCell>{cell.name}</TableCell>
-                <TableCell>{cell.serviceName}</TableCell>
-                <TableCell>{cell.size}</TableCell>
-                <TableCell>{cell.progress}</TableCell>
-                <TableCell className={cell.status}>{cell.status}</TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <div className="table">
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>#</TableCell>
+              <TableCell>Filename</TableCell>
+              <TableCell>Service</TableCell>
+              <TableCell>Size</TableCell>
+              <TableCell>Progress</TableCell>
+              <TableCell>Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {props.files.map((file, index) => {
+              const cell = {
+                index: index + 1,
+                name: utils.trimFilename(file.name, 25),
+                serviceName: file.serviceName,
+                size: file.size || '?',
+                progress: file.status === 'completed' ? '100%' : file.progress ? `${file.progress}%` : '?',
+                status: file.status
+              };
+              return (
+                <TableRow key={file.id} hover={true}>
+                  <TableCell>{cell.index}</TableCell>
+                  <TableCell>{cell.name}</TableCell>
+                  <TableCell>{cell.serviceName}</TableCell>
+                  <TableCell>{cell.size}</TableCell>
+                  <TableCell>{cell.progress}</TableCell>
+                  <TableCell className={cell.status}>{cell.status}</TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
       {props.files.length > 0 ? (
         <div className="btn-clear">
           <Button onClick={props.onClear} size="small" color="secondary">
