@@ -17,7 +17,7 @@ send -- "unzip -o $PROJECT_NAME.zip -d $PROJECT_NAME\r"
 expect $prompt
 
 # copy the build
-send -- "sudo rm -rf /var/www/html/* && sudo cp -r $PROJECT_NAME/* /var/www/html/\r"
+send -- "sudo rm -rf /var/www/html/* && sudo cp -r $PROJECT_NAME/build/* /var/www/html/\r"
 expect $prompt
 
 # delete zip file
