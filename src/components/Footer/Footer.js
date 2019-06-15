@@ -12,8 +12,8 @@ function Footer() {
         </span>
         <span> | </span>
         <span>
-          <a href="/private-policy" target="_blank">
-            Private Policy
+          <a href="/privacy-policy" target="_blank">
+            Privacy Policy
           </a>
         </span>
       </section>
