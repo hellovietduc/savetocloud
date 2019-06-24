@@ -1,7 +1,7 @@
 {
-  "name": "savetodrive-frontend",
+  "name": "savetocloud-frontend",
   "version": "1.0.2",
-  "description": "SaveToDrive - Upload files from URL to Cloud Services",
+  "description": "SaveToCloud - Upload files from URL to Cloud Services",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

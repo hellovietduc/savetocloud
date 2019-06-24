@@ -6,7 +6,7 @@ function Header() {
   return (
     <header>
       <Typography variant="h3" color="primary" gutterBottom>
-        SaveToDrive
+        SaveToCloud
         {/* <span className="beta"> beta</span> */}
       </Typography>
       <Typography variant="h5" gutterBottom>

@@ -1,3 +1,3 @@
-# savetodrive-frontend
+# savetocloud-frontend
 
-SaveToDrive - Upload files from URL to Cloud Services
+SaveToCloud - Upload files from URL to Cloud Services
