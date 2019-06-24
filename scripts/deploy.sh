@@ -12,6 +12,10 @@ set prompt "$ "
 spawn ssh -i $SSH_KEY $USERNAME@$SERVER_IP
 expect $prompt
 
+# install dependencies
+send -- "sudo apt install unzip\r"
+expect $prompt
+
 # extract zip file
 send -- "unzip -o $PROJECT_NAME.zip -d $PROJECT_NAME\r"
 expect $prompt

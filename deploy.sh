@@ -9,6 +9,10 @@ PROJECT_NAME=$(cat package.json \
   | sed 's/[",]//g' \
   | tr -d '[[:space:]]')
 
+# install dependencies
+sudo apt install zip
+npm install -g env-cmd
+
 # build the project locally
 rm -rf build
 env-cmd npm run build
@@ -17,10 +21,10 @@ env-cmd npm run build
 zip -r -9 -q "$PROJECT_NAME.zip" build
 
 # upload zip file to server
-scripts/upload "$(pwd)/$PROJECT_NAME.zip" $SERVER_IP $USERNAME $SSH_KEY
+scripts/upload.sh "$(pwd)/$PROJECT_NAME.zip" $SERVER_IP $USERNAME $SSH_KEY
 
 # deploy server
-scripts/deploy $PROJECT_NAME $SERVER_IP $USERNAME $SSH_KEY
+scripts/deploy.sh $PROJECT_NAME $SERVER_IP $USERNAME $SSH_KEY
 
 # delete zip file and build folder
 rm -rf "$PROJECT_NAME.zip" build
